@@ -17,8 +17,11 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('posts', 'PostsController@index');
-$router->get('posts/{id}', 'PostsController@show');
+$router->get('/post', 'PostsController@index');
+$router->post('/post', 'PostsController@store');
+$router->get('/post/{id}', 'PostsController@show');
+$router->put('/post/{id}', 'PostsController@update');
+$router->delete('/post/{id}', 'PostsController@destroy');
 
 $router->get('users', 'UsersController@index');
 $router->get('users/{id}', 'UsersController@show');
@@ -31,3 +34,9 @@ $router->get('comments/{id}', 'CommentsController@show');
 
 $router->get('tags', 'TagsController@index');
 $router->get('tags/{id}', 'TagsController@show');
+
+$router->get('/students', 'StudentsController@index');
+$router->post('/students', 'StudentsController@store');
+$router->get('/student/{id}', 'StudentsController@show');
+$router->put('/student/{id}', 'StudentsController@update');
+$router->delete('/student/{id}', 'StudentsController@destroy');
