@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name', 100);
-            $table->string('email', 100)->unique();
-            $table->enum('role', array('admin', 'member'))->default('member');
+            $table->string('email', 100)->unique('email_unique');
+            $table->string('password', 100);
             $table->timestamps();
         });
     }

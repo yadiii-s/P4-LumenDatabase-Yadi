@@ -17,12 +17,37 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->get('/posts', 'PostsController@index');
-$router->post('/posts', 'PostsController@store');
-$router->get('/post/{id}', 'PostsController@show');
-$router->put('/post/{id}', 'PostsController@update');
-$router->delete('/post/{id}', 'PostsController@destroy');
+// Authentication Routes
+$router->group(['prefix' => 'auth'], function () use ($router) {
+    // Matches "/auth/register"
+    $router->post('/register', 'AuthController@register');
+    // Matches "/auth/login"
+    $router->post('/login', 'AuthController@login');
+    // Matches "/auth/logout"
+    $router->delete('/logout', ['middleware' => 'auth', 'uses' => 'AuthController@logout']);
+    // Matches "/auth/me"
+    $router->get('/me', ['middleware' => 'auth', 'uses' => 'AuthController@me']);
+});
 
+// Post Routes (Protected by Authentication Middleware)
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->get('/posts', 'PostsController@index');
+    $router->post('/posts', 'PostsController@store');
+    $router->get('/post/{id}', 'PostsController@show');
+    $router->put('/post/{id}', 'PostsController@update');
+    $router->delete('/post/{id}', 'PostsController@destroy');
+});
+
+// Tantangan Modul: REST CRUD Berotentikasi (Products)
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->get('/products', 'ProductsController@index');
+    $router->post('/products', 'ProductsController@store');
+    $router->get('/product/{id}', 'ProductsController@show');
+    $router->put('/product/{id}', 'ProductsController@update');
+    $router->delete('/product/{id}', 'ProductsController@destroy');
+});
+
+// Resource routes dari praktikum sebelumnya
 $router->get('users', 'UsersController@index');
 $router->get('users/{id}', 'UsersController@show');
 

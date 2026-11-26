@@ -4,40 +4,45 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostsController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-{
-    $posts = Post::OrderBy("id", "DESC")->paginate(2)->toArray();
-    $response = [
-        "total_count" => $posts["total"],
-        "limit" => $posts["per_page"],
-        "pagination" => [
-            "next_page" => $posts["next_page_url"],
-            "current_page" => $posts["current_page"]
-        ],
-        "data" => $posts["data"],
-    ];
+    {
+        $posts = Post::Where(['user_id' => Auth::user()->id])->orderBy("id", "DESC")->paginate(2)->toArray();
+        $response = [
+            "total_count" => $posts["total"],
+            "limit" => $posts["per_page"],
+            "pagination" => [
+                "next_page" => $posts["next_page_url"],
+                "current_page" => $posts["current_page"]
+            ],
+            "data" => $posts["data"],
+        ];
 
-    return response()->json($response, 200);
-}
-
+        return response()->json($response, 200);
+    }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $input = $request->all();
+        if (!isset($input['user_id']) && Auth::check()) {
+            $input['user_id'] = Auth::user()->id;
+        }
+
         $validationRules = [
             'title' => 'required|min:5',
             'content' => 'required|min:10',
@@ -58,8 +63,8 @@ class PostsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request, $id)
@@ -76,8 +81,8 @@ class PostsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -114,11 +119,10 @@ class PostsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         $post = Post::find($id);
 
@@ -127,8 +131,8 @@ class PostsController extends Controller
         }
 
         $post->delete();
-        $message = ['message' => 'deleted successfully', 'post_id' => $id];
 
+        $message = ['message' => 'deleted successfully', 'post_id' => $id];
         return response()->json($message, 200);
     }
 }
